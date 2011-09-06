@@ -32,7 +32,7 @@ module FFI
   def self.type_size (type)
     type = FFI.find_type(type) if type.is_a?(Symbol)
 
-    if type.is_a?(Class) && type.ancestors.member?(FFI::Struct) || type.ancestors.member?(FFI::ManagedStruct) || type.ancestors.member?(Type::Builtin)
+    if type.is_a?(Type::Builtin) || type.is_a?(Class) && type.ancestors.member?(FFI::Struct) || type.ancestors.member?(FFI::ManagedStruct)
       type.size
     elsif type.respond_to? :from_native
       type.native_type.size
@@ -91,10 +91,10 @@ module FFI
         end
       end
 
-      if type.is_a?(Class) && type.ancestors.member?(FFI::Struct) && !type.ancestors.member?(FFI::ManagedStruct)
-        type.new(self)
-      elsif type.is_a?(Type::Builtin)
+      if type.is_a?(Type::Builtin)
         send "read_#{type.name.downcase}"
+      elsif type.is_a?(Class) && type.ancestors.member?(FFI::Struct) && !type.ancestors.member?(FFI::ManagedStruct)
+        type.new(self)
       elsif type.respond_to? :from_native
         type.from_native(typecast(type.native_type), nil)
       else
