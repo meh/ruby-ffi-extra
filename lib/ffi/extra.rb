@@ -14,7 +14,7 @@ module FFI
 	def self.type_size (type)
 		type = FFI.find_type(type) if type.is_a?(Symbol)
 
-		if type.is_a?(Type::Builtin) || type.is_a?(Class) && type.ancestors.member?(FFI::Struct) || type.ancestors.member?(FFI::ManagedStruct)
+		if type.is_a?(Type::Builtin) || (type.is_a?(Class) && (type.ancestors.member?(FFI::Struct) || type.ancestors.member?(FFI::ManagedStruct)))
 			type.size
 		elsif type.respond_to? :from_native
 			type.native_type.size
@@ -100,7 +100,7 @@ module FFI
 			end
 		end
 
-		def read_array_of (number, type)
+		def read_array_of (type, number)
 			if type.is_a?(Symbol)
 				if respond_to? "read_array_of_#{type.downcase}"
 					return send "read_array_of_#{type.downcase}", number
