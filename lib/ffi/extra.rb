@@ -124,7 +124,7 @@ module FFI
 			end
 		end
 
-		def write_array_of (data, type)
+		def write_array_of (type, data)
 			if type.is_a?(Symbol)
 				if respond_to? "write_array_of_#{type}"
 					return send "write_array_of_#{type}", data
