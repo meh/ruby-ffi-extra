@@ -150,3 +150,11 @@ module FFI
 	find_type(:size_t) rescue  typedef(:ulong, :size_t)
 	find_type(:ssize_t) rescue typedef(:long,  :ssize_t)
 end
+
+[Integer, String, NilClass, TrueClass, FalseClass, FFI::Pointer].each {|klass|
+	klass.instance_eval {
+		define_method :to_ffi do
+			self
+		end
+	}
+}
