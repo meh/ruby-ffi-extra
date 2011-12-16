@@ -23,6 +23,20 @@ module FFI
 		end
 	end
 
+	@loader = Class.new {
+		extend FFI::Library
+
+		ffi_lib FFI::Library::CURRENT_PROCESS
+	}
+	
+	def self.load (path)
+		@loader.instance_eval { ffi_lib_add path }
+	end
+
+	def self.function (function, arguments = [], ret = :void)
+		@loader.instance_eval { attach_function function, arguments, ret }
+	end
+
 	module Library
 		def ffi_lib_add (*names)
 			ffi_lib *((begin
@@ -151,7 +165,7 @@ module FFI
 	find_type(:ssize_t) rescue typedef(:long,  :ssize_t)
 end
 
-[Integer, String, NilClass, TrueClass, FalseClass, FFI::Pointer].each {|klass|
+[Numeric, String, NilClass, TrueClass, FalseClass, FFI::Pointer].each {|klass|
 	klass.instance_eval {
 		define_method :to_ffi do
 			self
