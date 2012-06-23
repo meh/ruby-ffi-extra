@@ -78,7 +78,7 @@ module FFI
 	end
 
 	class Pointer
-		def read (type)
+		def read (type, *args)
 			if type.is_a?(Symbol)
 				if respond_to? "read_#{type}"
 					return send "read_#{type}"
@@ -88,17 +88,19 @@ module FFI
 			end
 
 			if type.is_a?(Type::Builtin)
-				send "read_#{type.name.downcase}"
+				send "read_#{type.name.downcase}", *args
 			elsif type.is_a?(Class) && type.ancestors.member?(FFI::Struct) && !type.ancestors.member?(FFI::ManagedStruct)
-				type.new(self)
+				type.new(self, *args)
 			elsif type.respond_to? :from_native
-				type.from_native(typecast(type.native_type), nil)
+				type.from_native(typecast(type.native_type, *args), nil)
 			else
 				raise ArgumentError, 'you have to pass a Struct, a Builtin type or a Symbol'
 			end
-		end; alias typecast read
+		end
+		
+		alias typecast read
 
-		def write (what, type=nil)
+		def write (what, type = nil)
 			if type
 				if respond_to? "write_#{type.downcase}"
 					send "write_#{type.downcase}", what
@@ -167,7 +169,7 @@ end
 
 [Numeric, String, NilClass, TrueClass, FalseClass, FFI::Pointer].each {|klass|
 	klass.instance_eval {
-		define_method :to_ffi do
+		define_method :to_native do
 			self
 		end
 	}
